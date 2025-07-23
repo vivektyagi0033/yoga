@@ -1,7 +1,6 @@
-<!-- Player Container (existing) -->
 <div id="player"></div>
 
-<!-- ===== NEW CAST BUTTON ADDITION ===== -->
+<!-- Cast Button (Now Shows AirPlay Instructions More Clearly) -->
 <button id="castButton" style="
   display: block;
   margin: 20px auto;
@@ -14,11 +13,11 @@
   cursor: pointer;
   font-weight: bold;
 ">
-  🔴 Cast to TV
+  🔴 Play on TV
 </button>
 
 <script>
-  // ===== EXISTING YOUTUBE PLAYER CODE =====
+  // ===== EXISTING YOUTUBE PLAYER CODE ===== 
   var tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -38,7 +37,7 @@ const PLAYLIST = [
     { id: 'PxwVnvcMh3s', start: 52 }
   ];
 
-  var player, currentIndex = 0;
+var player, currentIndex = 0;
 
   function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
@@ -60,14 +59,6 @@ const PLAYLIST = [
   function onPlayerReady(event) {
     loadVideo(currentIndex);
     event.target.setPlaybackRate(0.75);
-    
-    // ===== NEW: ADDED WARNING FOR YOUTUBE APP REDIRECT =====
-    event.target.addEventListener('onStateChange', function(e) {
-      if (window.location.href.match(/youtube\.com/)) {
-        alert("You left the playlist! Return to:\n" + 
-              "vivektyagi0033.github.io/yoga/");
-      }
-    });
   }
 
   function loadVideo(index) {
@@ -86,24 +77,30 @@ const PLAYLIST = [
     }
   }
 
-  // ===== NEW CAST FUNCTIONALITY =====
+  // ===== IMPROVED CAST/AIRPLAY DETECTION =====
   document.getElementById('castButton').addEventListener('click', function() {
-    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-      alert("1. Tap the 'Share' icon (📤)\n2. Select 'AirPlay'\n3. Choose your TV");
-    } else {
-      if (window.chrome && chrome.cast) {
-        cast.framework.CastContext.getInstance().requestSession();
-      } else {
-        alert("1. Tap Chrome's 3-dot menu (⋮)\n2. Select 'Cast'\n3. Choose your TV");
-      }
-    }
-  });
+    // Detect iOS
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      // Show visual guide for AirPlay
+      alert(`To cast from iPhone/iPad:
+1. Open Control Center (swipe down from top-right)
+2. Tap "Screen Mirroring" 
+3. Select your Apple TV
 
-  // ===== NEW: BLOCK YOUTUBE APP OPENING =====
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('a[href*="youtube.com"]')) {
-      e.preventDefault();
-      alert("Please stay on this page to maintain your playlist!");
+Or in Safari:
+1. Tap the Share icon (📤) 
+2. Tap "AirPlay"`);
+      
+    // Detect Android/Chrome
+    } else if (window.chrome) {
+      try {
+        cast.framework.CastContext.getInstance().requestSession();
+      } catch {
+        alert(`To cast from Android:
+1. Tap Chrome's 3-dot menu (⋮)
+2. Select "Cast"
+3. Choose your TV`);
+      }
     }
   });
 </script>
