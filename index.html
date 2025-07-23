@@ -1,20 +1,30 @@
+<!-- Player Container (existing) -->
 <div id="player"></div>
 
-<!-- Add this button below the player -->
-<button 
-  style="display: block; margin: 20px auto; padding: 12px 24px; font-size: 18px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer;"
-  onclick="alert('CASTING HELP:\n\nANDROID: Tap the Cast icon (🔗) in Chrome\nIPHONE: Tap Share → AirPlay (📱) in Safari\n\nEnsure your phone and TV are on the same Wi-Fi!');"
->
-  Need Help Casting to TV?
+<!-- ===== NEW CAST BUTTON ADDITION ===== -->
+<button id="castButton" style="
+  display: block;
+  margin: 20px auto;
+  padding: 15px 30px;
+  font-size: 20px;
+  background: #FF0000;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+">
+  🔴 Cast to TV
 </button>
 
 <script>
+  // ===== EXISTING YOUTUBE PLAYER CODE =====
   var tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-  const PLAYLIST = [
+const PLAYLIST = [
     { id: 'dF3j5X_fgf4', start: 1079 },
     { id: 'dF3j5X_fgf4', start: 1079 },
     { id: 'dF3j5X_fgf4', start: 1079 },
@@ -37,7 +47,7 @@
       playerVars: {
         autoplay: 1,
         controls: 1,
-        vq: 'hd1080', // Suggests 1080p (no guarantee)
+        vq: 'hd1080',
         preload: 'auto'
       },
       events: {
@@ -50,6 +60,14 @@
   function onPlayerReady(event) {
     loadVideo(currentIndex);
     event.target.setPlaybackRate(0.75);
+    
+    // ===== NEW: ADDED WARNING FOR YOUTUBE APP REDIRECT =====
+    event.target.addEventListener('onStateChange', function(e) {
+      if (window.location.href.match(/youtube\.com/)) {
+        alert("You left the playlist! Return to:\n" + 
+              "vivektyagi0033.github.io/yoga/");
+      }
+    });
   }
 
   function loadVideo(index) {
@@ -64,8 +82,28 @@
       loadVideo(currentIndex);
     }
     else if (event.data === YT.PlayerState.PLAYING) {
-      player.setPlaybackRate(0.75); // Force 0.75x speed
+      player.setPlaybackRate(0.75);
     }
   }
-</script>
 
+  // ===== NEW CAST FUNCTIONALITY =====
+  document.getElementById('castButton').addEventListener('click', function() {
+    if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+      alert("1. Tap the 'Share' icon (📤)\n2. Select 'AirPlay'\n3. Choose your TV");
+    } else {
+      if (window.chrome && chrome.cast) {
+        cast.framework.CastContext.getInstance().requestSession();
+      } else {
+        alert("1. Tap Chrome's 3-dot menu (⋮)\n2. Select 'Cast'\n3. Choose your TV");
+      }
+    }
+  });
+
+  // ===== NEW: BLOCK YOUTUBE APP OPENING =====
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('a[href*="youtube.com"]')) {
+      e.preventDefault();
+      alert("Please stay on this page to maintain your playlist!");
+    }
+  });
+</script>
