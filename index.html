@@ -1,27 +1,41 @@
-<div id="player"></div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yoga Playlist for TV</title>
+    <style>
+        #castButton {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #FF0000;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #instructions {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="player"></div>
+    <button id="castButton">
+        🔴 Play on TV
+    </button>
+    <p id="instructions">Tap the button above for TV setup help</p>
 
-<!-- Cast Button (Now Shows AirPlay Instructions More Clearly) -->
-<button id="castButton" style="
-  display: block;
-  margin: 20px auto;
-  padding: 15px 30px;
-  font-size: 20px;
-  background: #FF0000;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  font-weight: bold;
-">
-  🔴 Play on TV
-</button>
-
-<script>
-  // ===== EXISTING YOUTUBE PLAYER CODE ===== 
-  var tag = document.createElement('script');
-  tag.src = "https://www.youtube.com/iframe_api";
-  var firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    <script>
+        // ===== YOUTUBE PLAYER SETUP =====
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 const PLAYLIST = [
     { id: 'dF3j5X_fgf4', start: 1079 },
@@ -39,68 +53,76 @@ const PLAYLIST = [
 
 var player, currentIndex = 0;
 
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-      height: '390',
-      width: '640',
-      playerVars: {
-        autoplay: 1,
-        controls: 1,
-        vq: 'hd1080',
-        preload: 'auto'
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
-      }
-    });
-  }
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '390',
+                width: '640',
+                playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    vq: 'hd1080',
+                    preload: 'auto'
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
 
-  function onPlayerReady(event) {
-    loadVideo(currentIndex);
-    event.target.setPlaybackRate(0.75);
-  }
+        function onPlayerReady(event) {
+            loadVideo(currentIndex);
+            event.target.setPlaybackRate(0.75);
+        }
 
-  function loadVideo(index) {
-    if (index >= PLAYLIST.length) return;
-    const video = PLAYLIST[index];
-    player.loadVideoById({ videoId: video.id, startSeconds: video.start });
-  }
+        function loadVideo(index) {
+            if (index >= PLAYLIST.length) return;
+            const video = PLAYLIST[index];
+            player.loadVideoById({ videoId: video.id, startSeconds: video.start });
+        }
 
-  function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED) {
-      currentIndex++;
-      loadVideo(currentIndex);
-    }
-    else if (event.data === YT.PlayerState.PLAYING) {
-      player.setPlaybackRate(0.75);
-    }
-  }
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                currentIndex++;
+                loadVideo(currentIndex);
+            }
+            else if (event.data === YT.PlayerState.PLAYING) {
+                player.setPlaybackRate(0.75);
+            }
+        }
 
-  // ===== IMPROVED CAST/AIRPLAY DETECTION =====
-  document.getElementById('castButton').addEventListener('click', function() {
-    // Detect iOS
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      // Show visual guide for AirPlay
-      alert(`To cast from iPhone/iPad:
-1. Open Control Center (swipe down from top-right)
-2. Tap "Screen Mirroring" 
-3. Select your Apple TV
+        // ===== CASTING SOLUTION THAT WORKS =====
+        document.getElementById('castButton').addEventListener('click', function() {
+            // For iOS Devices
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                alert(`iPhone/iPad Users:
+1. Swipe down from top-right to open Control Center
+2. Tap "Screen Mirroring"
+3. Select your Apple TV/Smart TV
 
-Or in Safari:
-1. Tap the Share icon (📤) 
-2. Tap "AirPlay"`);
-      
-    // Detect Android/Chrome
-    } else if (window.chrome) {
-      try {
-        cast.framework.CastContext.getInstance().requestSession();
-      } catch {
-        alert(`To cast from Android:
-1. Tap Chrome's 3-dot menu (⋮)
-2. Select "Cast"
-3. Choose your TV`);
-      }
-    }
-  });
-</script>
+Note: This mirrors your entire screen to the TV`);
+            
+            // For Android/Chromecast
+            } else if (navigator.userAgent.includes('Chrome')) {
+                alert(`Android Users:
+1. Make sure your TV has Chromecast
+2. Tap the 3-dot menu in Chrome (⋮)
+3. Select "Cast"
+4. Choose your TV from the list`);
+            
+            // For other devices
+            } else {
+                alert("Please use Chrome on Android or Safari on iPhone/iPad for best results");
+            }
+        });
+
+        // ===== PREVENT YOUTUBE APP OPENING =====
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('a[href*="youtube.com"]')) {
+                e.preventDefault();
+                alert("Please stay on this page to keep your playlist!");
+            }
+        });
+    </script>
+</body>
+</html>
